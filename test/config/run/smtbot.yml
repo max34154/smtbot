@@ -1,0 +1,54 @@
+module_ip: 212.11.152.7:13080
+login: max
+async-gateway-id: 1AEF
+async-gateway-port: 300
+collections:
+- name: SMTBotUsers
+  acl: true
+  keylist:
+  - SMTUserID
+- name: FOSpp
+  acl: false
+  keylist:
+  - InteractionID
+- name: interactions
+  acl: false
+  keylist:
+  - CallID
+max-attachment-size: 20000000
+max-total-att-size: 0
+mime-types:
+- image/png
+- image/jpg
+- image/jpeg
+- image/bmp
+- image/tiff
+- application/msword
+- text/csv
+- text/html
+- text/javascript
+- text/plain
+- application/json
+- application/pdf
+- application/vnd.ms-powerpoint
+- application/vnd.openxmlformats-officedocument.presentationml.presentation
+- application/vnd.rar
+- application/rtf
+- application/vnd.visio
+- application/vnd.ms-excel
+- application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+- application/zip
+async-pusher-enabled: true
+async-action-keys:
+- ActionID
+write-intermidiate-result: false
+poll-enabled: true
+poll-port: 3001
+smtbot-update-users-collection: SMTBotUsers
+smtbot-update-users-item: SMTBotUser
+smtbot-update-users-action: Update
+smtbot-update-users-retires: 10
+smtbot-update-users-retry-interval: 16
+smtbot-user-key-name: SMTUserID
+smtbot-user-keylist-name: SMTUserIDList
+smtbot-token: 5142232953:AAHKj2XXwB-J9MKfs4Xtn7GKjYHpsTa1aZw

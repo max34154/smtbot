@@ -1,0 +1,78 @@
+# 1. Whole user typed string is subject of any reqexp, use ^ and $ specify parsing direction
+# 2. callback-reg result usage depends of callback action:
+#   get -  as a unique item key 
+#   get-query - for $reqN$ macros positional substitution  
+#   others - for request body $reqN$ macros positional substitution  
+#
+
+command: 
+    help:  { role: any, message: help }
+    start: { role: any, message: welcome } 
+    reg:   { role: any , message: TBRegInprogress, errmessage: TBRegError }
+    unreg: { role: any , message: TBUnreg, errmessage: TBUnregError, menu: TBConfirmUnreg }
+    status: {role: any , message: SDstatus, errmessage: mySDError,  callback: getSD, callback-reg: (SD\d+)$ }
+    detail: 
+           role: [user, operator]
+           message: SDstatus 
+           errmessage: mySDError
+           callback: getSD 
+           callback-reg: (SD\d+)$ 
+           menu: SDchat 
+           options:
+              - { option: all,  message:  SDbrief, menu: NoMenu} 
+              - { option: answer, message: SDanswer, menu: NoMenu}
+              - { option: question, message: SDquestion, menu: NoMenu }
+            
+    mySD:  
+           role: user
+           message: SDMyList
+           errmessage: mySDError
+           callback: getMySD
+           options: 
+             - { option: open, callback: SDMyOpenList, message:  SDMyList}  
+             - { option: wait, callback: SDMyWaitList }
+             - { option: period, callback: SDMyPeriodList, callback-reg: (\d+.\d+.\d+)-(\d+.\d+.\d+)\s*$  }
+          
+    hisSD:  
+           role: operator
+           message: SDMyList
+           errmessage: mySDError
+           callback: getHisSD
+           callback-reg: .*\s(.+@.+)\s*$
+           options: 
+             - { option: open, callback: SDHisOpenList, message:  SDMyList}  
+             - { option: wait, callback: SDHisWaitList }
+             - { option: period, callback: SDMyPeriodList, callback-reg: (\d+.\d+.\d+)-(\d+.\d+.\d+)\s*$  }
+
+            
+inline:
+  - {reg: ^SD\d+ , role: any, title: SDstatus, message: SDShort, menu: SDprint,  callback: getSD, callback-reg: ^(SD\d+)}
+
+
+menu-callback:
+    briefISD:    { role: any, text: SDbrief, callback: getSD, callback-reg: (SD\d+)$, message: SDbrief, errmessage: mySDError }
+    answerISD:   { role: any, text: SDanswer,  callback: getSD,  callback-reg: (SD\d+)$, message: SDstatus, errmessage: mySDError}
+    questionISD: { role: any, text: SDquestion, callback: getSD,  callback-reg: (SD\d+)$, message: SDstatus, errmessage: mySDError }
+    briefCSD:    { role: any,  callback: getSD, callback-reg: (SD\d+)$, message: SDbrief, errmessage: mySDError }
+    answerCSD:   { role: any,   callback: getSD,  callback-reg: (SD\d+)$, message: SDanswer, errmessage: mySDError}
+    questionCSD: { role: any,  callback: getSD,  callback-reg: (SD\d+)$, message: SDquestion, errmessage: mySDError }
+   
+    userunreg:  { role: contact, text: UserUnregConfirmation }
+    myOpenListSD: { role: contact, text: SDMyOpenList, callback: SDMyOpenList, message:  SDMyList }
+    myWaitListSD: { role: contact, text: SDMyWaitList, callback: SDMyWaitList, message:  SDMyList }
+
+
+menu:
+   SDprint: 
+    - - {text: SDprintbrief, callback_data: briefISD$1$}
+    - - {text: SDprintquestion, callback_data: questionISD$1$}
+    - - {text: SDprintanswer, callback_data: answerISD$1$} 
+
+   SDchat: 
+    - - {text: SDprintbrief, callback_data: briefCSD$1$}
+    - - {text: SDprintquestion, callback_data: questionCSD$1$}
+    - - {text: SDprintanswer, callback_data: answerCSD$1$}
+
+   TBConfirmUnreg:
+    - - {text: "Shure?",  callback_data: userunreg$1$}
+

@@ -1,0 +1,230 @@
+#
+# format - message formating, supporeted values: MarkdownV2,HTML 
+#          for details https://core.telegram.org/bots/api#formatting-options
+#
+welcome:
+       en: 'Hello, SMTBot helps to work with ЕАИСТ support.'
+       ru: 'Добрый день, вас приветствует бот СТП ЕАИСТ. 
+            Для получения информации о возможностях бота наберите /help'
+help:  
+      en: 'long help text'
+      ru: 'Список доступных команд:\n
+           /reg <email> - выполнить регистрацию, достпна только для незарегистрированных пользователелей\n\n 
+           /unreg - удалить себе из списка заргестрированных пользователей\n\n
+           /status <SDXXX> - получить информацию о текущем статусе Обращения\n\n
+           /detail <SDXXX> - получить подробную информацию об Обращении
+             Команда доступна тольк для зарегистрированых пользователей. \n
+             При этом пользователи ЕАИСТ могу получать информацию по своим обращениям.\n
+             Оператор SM ЕАИСТ может получить информацию по любому обращению.\n
+             Команда может быть использована в следующих формах:\n
+             /detail all <SDXXX> - подробная информацию по Обращению\n
+             /detail answer <SDXXX> - текст ответа\n
+             /detail question <SDXXX> - текст запроса\n\n
+            /MySD - список обращений данного пользователя\n. 
+              Команда доступна только зарегистрированным пользователей,имеющих учетныю запись в ЕАИСТ\n
+              Команда может быть использована в следующих формах:\n
+              /MуSD open - список открытых обращений\n
+              /MySD waiting - список обращений, по которым ожидается ответ на запрос дополнительной информации\n\n
+            /HisSD <email> - cписок обращений в которых <email> указан в качестве контактного\n
+               Команда доступна только операторам SM ЕАИСТ\n
+               Команда может быть использована в следующих формах:\n
+               /HisSD open <email> - список открытых обращений\n
+               /HisSD waiting <email> - список обращений, по которым ожидается ответ на запрос дополнительной информации\n'
+
+SDstatus:
+      en: '{{InteractionID}}:{{Title}} - {{StatusForUser}} '
+      ru: '{{InteractionID}}:{{Title}} - {{StatusForUser}} '
+      item: Interaction
+      mapper-list:
+          -  map-name: SDStatusForUser
+             field-name: StatusForUser 
+ 
+
+
+SDbrief: 
+      en: "{{InteractionID}}:{{Title}}
+         Open: {{OpenTime}}
+         Status: {{StatusForUser}}
+         Category: {{Category}}"
+
+      ru: "{{InteractionID}}:{{Title}}\n
+        <u>Время создания:</u> {{OpenTime}}\n
+        <u>Cтатус:</u> {{StatusForUser}}\n
+        <u>Категория:</u> {{Category}}\n
+        <u>Описание:</u>\n{{Description}}\n
+        <u>Решение:</u>\n{{Resolution}}"
+
+      format: HTML
+      item: Interaction
+      list: false  
+      converter-list: 
+          -  func: standart-short-time 
+             field-name: OpenTime
+          -  func: text-block
+             field-name: Resolution
+          -  func: text-block
+             field-name: Description
+
+      mapper-list:
+          -  map-name: SDStatusForUser
+             field-name: StatusForUser 
+          -  map-name: SDCategory
+             field-name: Category 
+
+
+SDShort: 
+      en: "<b>{{InteractionID}}</b>:{{Title}}
+         <u>Open:</u> {{OpenTime}}
+         <u>Status:</u> {{StatusForUser}}
+         <u>Category:</u> {{Category}}"
+
+      ru: "<b>{{InteractionID}}</b>:{{Title}}\n
+        <u>Время создания:</u> {{OpenTime}}\n
+        <u>Cтатус:</u> {{StatusForUser}}\n
+        <u>Категория:</u> {{Category}}\n
+        <u>Описание:</u>{{Description}}"
+
+
+      format: HTML
+      item: Interaction
+      list: false  
+      converter-list: 
+          -  func: standart-short-time 
+             field-name: OpenTime
+          -  func: text-block
+             field-name: Description
+
+      mapper-list:
+          -  map-name: SDStatusForUser
+             field-name: StatusForUser 
+          -  map-name: SDCategory
+             field-name: Category 
+
+SDanswer:
+      en: '{{#Resolution}}<u>Solution for <b>{{InteractionID}}<b></u>: {{Resolution}}{{#Resolution}}{{^Resolution}}Solution for {{InteractionID}} not proposed yet{{#Resolution}}' 
+      ru: '{{#Resolution}}<u>Решение по обращению <b>{{InteractionID}}</b>:</u> {{Resolution}}{{#Resolution}}{{^Resolution}}Решение по обращению {{InteractionID}} еще не предоставлено{{#Resolution}}'
+      #ru: '{{#Interaction}}<u>Решение по обращению <b>{{InteractionID}}</b>:</u>{{Resolution}}{{/Interaction}}'  
+      item: Interaction
+      converter-list:
+          -  func: text-block
+             field-name: Resolution
+      format: HTML 
+
+SDquestion:
+      en: '<u>Description for <b>{{InteractionID}}:</b> {{Description}}' 
+      ru: '<u>Описание обращения <b>{{InteractionID}}</b>:</u> {{Description}}'
+      item: Interaction
+      converter-list:
+          -  func: text-block
+             field-name: Description 
+      format: HTML 
+
+SDprintbrief:
+      #en: 'Brief'
+      ru: 'Краткая информация'
+
+SDprintquestion:
+      #en: 'Description'
+      ru: 'Описание'
+
+SDprintanswer:
+      #en: 'Solution'
+      ru: 'Решение'
+
+InlineWaiting:
+      en: 'Looking for {{item-key}} ...'
+      ru: 'Ищем {{item-key}}...'  
+
+InlineNotFound:
+      en: 'Item {{item-key}} not found...'
+      ru: 'Не удалось полчить информацию по {{item-key}}...'
+
+
+SDMyList: 
+      en: "{{#content}} 
+        {{InteractionID}}:{{Title}} -> {{StatusForUser}}\n
+        {{/content}}" 
+
+      ru: "{{#content}} 
+        <b>{{InteractionID}}</b>:{{Title}} -> {{StatusForUser}}\n
+        {{/content}}"
+      format: HTML 
+      item: Interaction
+      list: false  
+      converter-list: 
+          -  func: standart-short-time 
+             field-name: OpenTime
+
+      mapper-list:
+          -  map-name: SDStatusForUser
+             field-name: StatusForUser 
+
+TBOTUserBlocked: 
+      en: "Your account is blocked. You may use only public operations"
+      ru: "Ваша учетная запись заблокирована, вы можете использовать только общедоступные операции"
+
+TBOTRegReq:
+      en: "This operation available for registred users only. Use command /reg to start registration procedure"
+      ru: "Данная операция доступна только для зарегистрированных пользователей."
+
+TBOTRegInProgress:
+      en: "You have to complite registration."
+      ru: "Пожалуйста, завершите процедуру регистрации."
+
+TBOTRegIncorrectMail:
+      en: "Email is not supplied or has a wrong format"
+      ru: "Не указан адрес электронной почты."
+
+TBOTRegAlreadyRegistred:
+      ru: "Данный пользователь Telegram уже зарегистрирован.\n
+           Повторная регистрация возможна только после выполнения команды /unreg"
+
+TBOTRegComplite:
+      ru: "На Вашу электронную почту направлен проверочный код.\n
+           Для завершения процедуры регистрации выполните команду:\n
+            /reg <Ваше электронная почта> <проверочный код>"
+
+TBOTRegSuccess:
+      ru: "Регистрация успешно завершена"
+
+TBITWrongCode:
+      ru: "Указанный код не верен.\n 
+          Если Вы хотите получить код повторно выполните команду:\n
+          /reg <Ваше электронная почта>"       
+
+TBOTUserCheck:
+      en: "You account is temporarily blocked. Try again later."
+      ru: "Ваша учетная запись временно заблокирована. Попробуйте выполнить операциию позднее."
+
+TBOTNotPremited:
+     en: "Operation not permited for your access level."
+     ru: "Ваш уровень доступа не позволяет выполнить данную операцию."
+
+TBOTUnknowCommand:
+    en: "Uknown command. For list of commands type /help" 
+    ru: "Неизвестная команда. Для получения списка команд введите /help"
+
+ТВОТDefaulCommandErorr:
+    en: "Generic command error." 
+    ru: "При выполнении команды произошла ошибка."
+
+mySDError:
+    #en: "Unable to find requested information." 
+    ru: "Данные отсуствуют."
+
+
+TBOTNotFound:
+    #en: "Unable to find requested information." 
+    ru: "Не найдено."
+
+SDMyOpenList:
+    en: "My open interactions." 
+    ru: "Мои открытые обращения."
+
+SDMyWaitList:
+    en: "Interactions, waiting my response." 
+    ru: "Обращения, по которым запрошена доп. ифнформация."
+
+CommandWaiting:
+    en: "Wait a minute..."
+    ru: "Минуточку..."

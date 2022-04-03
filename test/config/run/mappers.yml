@@ -1,0 +1,16 @@
+SDStatusForUser:
+  indexed: true 
+  open: 
+      en: "In progress"
+      ru: "В Работе"
+  closed:
+      en: "Closed"
+      ru: "Закрыто"
+  waiting:    
+      en: "Wating for contact's responce"
+      ru: "В ожидании доп.инф."
+SDCategory:
+   indexed: false 
+   keys: ["инидент", "консультация"]
+   en: ["Incident", "Consultation"]
+   ru: ["Инцидент", "Консультация"]

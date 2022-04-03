@@ -1,0 +1,47 @@
+- callback: getSD
+  service: FOSeaistIntInfo
+  action: get
+  collection-item-key: InteractionID
+  access-list:
+    {
+      user: [ ["Interaction", "ContactEmail"], "user-mail"] ,
+      operator: "always" 
+    }
+
+- callback: getMySD
+  service: FOSeaistIntInfo
+  action: get-query
+  collection-item-key: InteractionID
+  query: ContactEmail=$user$
+
+- callback: SDMyOpenList
+  service: FOSeaistIntInfo
+  action: get-query
+  collection-item-key: InteractionID
+  query: ContactEmail=$user$ and StatusForUser~="closed"
+
+- callback: SDMyWaitList
+  service: FOSeaistIntInfo
+  action: get-query
+  collection-item-key: InteractionID
+  query: ContactEmail=$user$ and StatusForUser="waiting"
+
+- callback: getHisSD
+  service: FOSeaistIntInfo
+  action: get-query
+  collection-item-key: InteractionID
+  query: ContactEmail="$reg1$"
+
+
+- callback: SDHisOpenList
+  service: FOSeaistIntInfo
+  action: get-query
+  collection-item-key: InteractionID
+  query: ContactEmail="$reg1$" and StatusForUser~="closed"
+
+
+- callback:  SDHisWaitList
+  service: FOSeaistIntInfo
+  action: get-query
+  collection-item-key: InteractionID
+  query: ContactEmail="$reg1$" and StatusForUser="waiting"
