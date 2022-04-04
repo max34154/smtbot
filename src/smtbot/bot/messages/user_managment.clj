@@ -6,14 +6,45 @@
    [smtbot.bot.users.operations :as user-ops]
    [smtbot.bot.message :as ms]))
 
-(defn- simple-message [chat-id lang msg-template-id]
-   (t/send-text @bot-token chat-id
-                (ms/render-message msg-template-id
-                                   (keyword (or lang default-lang))
-                                   {})))
+(defn- formated-simple-message
+  "
+    Send formated message and menu (if specified) to the chat.
+    Paramters:
+      chat-id  - chat unique id 
+      lang - message language 
+      msg-template-id - template identificator.  Template may content formating options.
+      menu - menu identifcator, optional 
+  "
+
+  ([chat-id lang msg-template-id]
+   (formated-simple-message chat-id lang msg-template-id nil))
+
+  ([chat-id lang msg-template-id menu]
+   (let [answer (ms/render-answer ""
+                                  (keyword (or lang default-lang))
+                                  menu
+                                  {}
+                                  msg-template-id)]
+     (t/send-text @bot-token chat-id (:text answer) answer))))
+
+(defn- simple-message
+  "
+    Send plain message to chat.
+    Paramters:
+      chat-id  - chat unique id 
+      lang - message language 
+      msg-template-id - template identificator. 
+   Template should not contain formating options.
+
+  "
+  [chat-id lang msg-template-id]
+  (t/send-text @bot-token chat-id
+               (ms/render-message msg-template-id
+                                  (keyword (or lang default-lang))
+                                  {})))
 
 (defn- wait-a-minute [chat-id lang]
-   (:message_id (simple-message chat-id lang :CommandWaiting)))
+  (:message_id (simple-message chat-id lang :CommandWaiting)))
 
 
 (defn welcome [{:keys [chat from]}]

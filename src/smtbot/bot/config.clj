@@ -25,7 +25,7 @@
                command))     command (keys command)))
 
 
-(defn command-role-process [command]
+(defn role-process [command]
   (reduce  (fn [command command-key]
              (if-let [role  (-> command command-key :role)]
                (update-in command [command-key :role]
@@ -41,13 +41,21 @@
               (update :command k/mk-pattern-map [:callback-reg])
               (update :command k/process-internal-vec [:options] [:option :message :errmessage :callback :menu] [:callback-reg])
               (update :command command-options-remap)
-              (update :command command-role-process)
-              (update :inline k/keywordize-vec [:title :menu :callback :role :message])
+              (update :command role-process)
+              (update :inline k/keywordize-vec [:title :menu :callback  :message])
               (update :inline k/mk-pattern-vec [:reg :callback-reg])
+              (update :inline (fn [v] (map
+                                       (fn [vv] (update vv :role
+                                                        #(if  (vector? %)
+                                                           (apply hash-set (map keyword %))
+                                                           (keyword %))))
+                                       v)))
              ; (update :callback k/keywordize-map [:role :text :callback])
              ; (update :callback k/mk-pattern-map [:callback-reg])
-              (update :menu-callback k/keywordize-map [:role :text :callback :message :errmessage])
+              (update :menu-callback k/keywordize-map [:text :callback :message :errmessage])
               (update :menu-callback k/mk-pattern-map [:callback-reg])
+              (update :menu-callback role-process)
+             ; (update :menu-callbac role-process)
               (update :menu k/keywordize-map-vec2 [:text :callback-data])))))
 
 (defn- read-mappers [_ path]

@@ -170,8 +170,11 @@
    (when (and (some? message-template) (some?  item))
      (create-answer-object command-object item message-template))))
 
-(defn make-error-answer [{:keys [item-key lang] :as item} error]
+#_(defn make-error-answer [{:keys [item-key lang] :as item} error]
   (ms/render-answer item-key lang nil item error))
+
+(defn make-error-answer [{:keys [item-key lang]} error]
+  (ms/render-answer item-key lang nil nil error))
 
 
 

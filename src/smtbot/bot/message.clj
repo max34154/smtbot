@@ -47,7 +47,7 @@
                         (if (some? (data :content))
                           {:content  (doall (map  transform (data :content)))}
                           (spy :debug (transform data))))
-          (msg-template lang)))
+          (parser/render (msg-template lang))))
      (error "Message template not found for msg-id=" msg-id))))
 
 

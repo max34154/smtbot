@@ -90,7 +90,10 @@
                               (update :role keyword))]
         (timbre/debug "Prepare user to update cache:" user)
         (case (:status user)
-          (nil "A" "B") (user-cache/add user)
+          (nil "A" "B") (if (> (.getTime (user :expire_at))
+                               (tod))
+                          (user-cache/add user)
+                          user)
           user)))))
 
 (defn init-registration

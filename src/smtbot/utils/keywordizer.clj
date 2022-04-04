@@ -32,7 +32,7 @@
     keys-list - vector of keys
    "
   [val keys-list]
-  (reduce #(if (some? (%1 %2)) (update %1 %2 keyword) %1) val keys-list))
+  (reduce #(if (some? (%1 %2)) (update %1 %2 keyword)  %1) val keys-list))
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn keywordize-in
