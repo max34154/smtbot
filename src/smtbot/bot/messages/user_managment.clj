@@ -6,6 +6,7 @@
    [smtbot.bot.users.operations :as user-ops]
    [smtbot.bot.message :as ms]))
 
+#_{:clj-kondo/ignore [:unused-private-var]}
 (defn- formated-simple-message
   "
     Send formated message and menu (if specified) to the chat.

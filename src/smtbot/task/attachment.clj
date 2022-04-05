@@ -18,12 +18,14 @@
             spy get-env]])
   (:import [java.net URLEncoder]))
 
+#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (def  fast-attachment-copy  "fast")
 
 (def get-attachments-by-req-id (delay (dal-a/get-attachments-by-req-id-factory (:database @config) (get-executors-globals :attachment-copy-mode))))
 
 (def get-attachment-body-by-id (delay (dal-a/get-attachment-body-by-id-factory (:database @config))))
 
+#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (def get-attachments-ids-by-req-id (delay (dal-a/get-attachments-ids-by-req-id-factory (:database @config))))
 
 (def set-attachment-copy-mark (delay (dal-a/set-attachment-copy-mark-factory (:database @config))))
