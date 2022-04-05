@@ -13,6 +13,7 @@
    [taoensso.timbre :as timbre]
    [smtbot.bot.messages.tmessage :refer [TMessage]]
    [smtbot.utils.message-log :as m-log]
+   [smtbot.bot.messages.synonim :as cs]
    [taoensso.timbre.appenders.core :as appenders]
    [smtbot.bot.message :as ms]))
 
@@ -79,33 +80,45 @@
   (send-answer obj (ms/render-message message (:lang obj) {}) {}))
 
 
+
+
+
 (defn select-command
   "
    Analyze message text. If starts with known command creates command object.
    Otherwise send error message. 
    Returns command obj or nil
   "
-  [{:keys [text chat from]}]
-  (let [[command option] (str/split text #"\s+")]
-    (if-let [command ((@bot :command)
-                      (-> command
-                          (subs 1) ;; remove leading /
-                          keyword))]
-      (do
-        (timbre/debugf "Command %s selected. Option text: %s" command option)
-        {:command-text  text
-         :option-text option
-         :chat-id (chat :id)
-         :user-id (:id from)
-         :lang (keyword (or (:language_code from) default-lang))
-         :command command})
-      (do
-        (timbre/debug "Command not found. Source:" text)
-        (t/send-text @bot-token (chat :id)
-                     (ms/render-message :TBOTUnknowCommand
-                                        (keyword (or (:language_code from) default-lang))
-                                        {}))
-        nil))))
+  ([{:keys [text chat from]}] (select-command text chat from))
+  ([text chat from]
+   (let [[command-str option] (str/split text #"\s+")
+         command-str (str/lower-case
+                      (if (str/starts-with? command-str "/")  ;; remove leading /
+                        (subs command-str 1)
+                        command-str))]
+     (if-let [command ((@bot :command) (keyword command-str))]
+       (do
+         (timbre/debugf "Command %s selected. Option text: %s" command option)
+         {:command-text  text
+          :option-text option
+          :chat-id (chat :id)
+          :user-id (:id from)
+          :lang (keyword (or (:language_code from) default-lang))
+          :command command})
+       (if-let [synonim (cs/check-synonim-list command-str)]
+         (do
+           (timbre/debug "Synonim found:" synonim) 
+           (-> synonim
+                 (cs/select-synonim-by-role from)
+                 (cs/transform-command-text text)
+                 (select-command chat from)))
+         (do
+           (timbre/debug "Command not found. Source:" text)
+           (t/send-text @bot-token (chat :id)
+                        (ms/render-message :TBOTUnknowCommand
+                                           (keyword (or (:language_code from) default-lang))
+                                           {}))
+           nil))))))
 
 
 (defn authorize-command
@@ -171,7 +184,7 @@
      (create-answer-object command-object item message-template))))
 
 #_(defn make-error-answer [{:keys [item-key lang] :as item} error]
-  (ms/render-answer item-key lang nil item error))
+    (ms/render-answer item-key lang nil item error))
 
 (defn make-error-answer [{:keys [item-key lang]} error]
   (ms/render-answer item-key lang nil nil error))
@@ -186,25 +199,25 @@
            (get-operator-id [_] ^String (:user-smkey command-object))
            (get-role [_]  (:user-role command-object))
            (error-response [_ error-code] (if (= error-code sm/RC_NO_MORE)
-                                            (send-answer command-object  
+                                            (send-answer command-object
                                                          (make-error-answer command-object :TBOTNotFound)
                                                          #_(make-answer command-object
-                                                                                      command-object
-                                                                                      :TBOTNotFound))
-                                            (send-answer command-object 
-                                                        (make-error-answer command-object  (command-object :errmessage)) 
+                                                                        command-object
+                                                                        :TBOTNotFound))
+                                            (send-answer command-object
+                                                         (make-error-answer command-object  (command-object :errmessage))
                                                          #_(make-answer command-object
-                                                                                      command-object
-                                                                                      (command-object :errmessage)))))
+                                                                        command-object
+                                                                        (command-object :errmessage)))))
            (response [_ sm-responce]
              (if (some? sm-responce)
                (send-answer command-object (make-answer command-object
                                                         sm-responce))
-               (send-answer command-object 
+               (send-answer command-object
                             (make-error-answer command-object  (command-object :errmessage))
                             #_(make-answer command-object
-                                                        command-object
-                                                        (command-object :errmessage)))))
+                                           command-object
+                                           (command-object :errmessage)))))
            (wait-a-minute [_] (CommandQuery. (assoc command-object :message-id
                                                     (simple-message command-object :CommandWaiting)))))
 

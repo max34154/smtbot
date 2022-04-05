@@ -10,20 +10,20 @@ command:
     start: { role: any, message: welcome } 
     reg:   { role: any , message: TBRegInprogress, errmessage: TBRegError }
     unreg: { role: any , message: TBUnreg, errmessage: TBUnregError, menu: TBConfirmUnreg }
-    status: {role: any , message: SDstatus, errmessage: mySDError,  callback: getSD, callback-reg: (SD\d+)$ }
+    status: {role: any , message: SDstatus, errmessage: mySDError,  callback: getSDStatus, callback-reg: ".*([Ss][Dd]\\d+)$" }
     detail: 
            role: [user, operator]
            message: SDstatus 
            errmessage: mySDError
            callback: getSD 
-           callback-reg: (SD\d+)$ 
+           callback-reg: ".*([Ss][Dd]\\d+)$"
            menu: SDchat 
            options:
               - { option: all,  message:  SDbrief, menu: NoMenu} 
               - { option: answer, message: SDanswer, menu: NoMenu}
               - { option: question, message: SDquestion, menu: NoMenu }
             
-    mySD:  
+    mysd:  
            role: user
            message: SDMyList
            errmessage: mySDError
@@ -33,7 +33,7 @@ command:
              - { option: wait, callback: SDMyWaitList }
              - { option: period, callback: SDMyPeriodList, callback-reg: (\d+.\d+.\d+)-(\d+.\d+.\d+)\s*$  }
           
-    hisSD:  
+    hissd:  
            role: operator
            message: SDMyList
            errmessage: mySDError
@@ -43,23 +43,28 @@ command:
              - { option: open, callback: SDHisOpenList, message:  SDMyList}  
              - { option: wait, callback: SDHisWaitList }
              - { option: period, callback: SDMyPeriodList, callback-reg: (\d+.\d+.\d+)-(\d+.\d+.\d+)\s*$  }
+    menu:
+         role: user
+         message: SDMenu 
+         menu: UserMenu
+         callback: getMySD
 
             
 inline:
-  - {reg: ^SD\d+ , role: any, title: SDstatus, message: SDShort, menu: SDprint,  callback: getSD, callback-reg: ^(SD\d+)}
+  - {reg: ^SD\d+ , role: any, title: SDstatus, message: SDShort, menu: SDprint,  callback: getSDStatus, callback-reg: ^(SD\d+)}
 
 
 menu-callback:
-    briefISD:    { role: any, text: SDbrief, callback: getSD, callback-reg: (SD\d+)$, message: SDbrief, errmessage: mySDError }
-    answerISD:   { role: any, text: SDanswer,  callback: getSD,  callback-reg: (SD\d+)$, message: SDstatus, errmessage: mySDError}
-    questionISD: { role: any, text: SDquestion, callback: getSD,  callback-reg: (SD\d+)$, message: SDstatus, errmessage: mySDError }
-    briefCSD:    { role: any,  callback: getSD, callback-reg: (SD\d+)$, message: SDbrief, errmessage: mySDError }
-    answerCSD:   { role: any,   callback: getSD,  callback-reg: (SD\d+)$, message: SDanswer, errmessage: mySDError}
-    questionCSD: { role: any,  callback: getSD,  callback-reg: (SD\d+)$, message: SDquestion, errmessage: mySDError }
+    briefISD:    { role: any, text: SDbrief, callback: getSDStatus, callback-reg: (SD\d+)$, message: SDbrief, errmessage: mySDError }
+    answerISD:   { role: any, text: SDanswer,  callback: getSDStatus,  callback-reg: (SD\d+)$, message: SDstatus, errmessage: mySDError}
+    questionISD: { role: any, text: SDquestion, callback: getSDStatus,  callback-reg: (SD\d+)$, message: SDstatus, errmessage: mySDError }
+    briefCSD:    { role: [user, operator],  callback: getSD, callback-reg: (SD\d+)$, message: SDbrief, errmessage: mySDError }
+    answerCSD:   { role: [user, operator],   callback: getSD,  callback-reg: (SD\d+)$, message: SDanswer, errmessage: mySDError}
+    questionCSD: { role: [user, operator],  callback: getSD,  callback-reg: (SD\d+)$, message: SDquestion, errmessage: mySDError }
    
-    userunreg:  { role: contact, text: UserUnregConfirmation }
-    myOpenListSD: { role: contact, text: SDMyOpenList, callback: SDMyOpenList, message:  SDMyList }
-    myWaitListSD: { role: contact, text: SDMyWaitList, callback: SDMyWaitList, message:  SDMyList }
+    userunreg:  { role: [user, operator], text: UserUnregConfirmation }
+    myOpenListSD: { role: user, text: SDMyOpenList, callback: SDMyOpenList, message:  SDMyList }
+    myWaitListSD: { role: user, text: SDMyWaitList, callback: SDMyWaitList, message:  SDMyList }
 
 
 menu:
@@ -76,3 +81,14 @@ menu:
    TBConfirmUnreg:
     - - {text: "Shure?",  callback_data: userunreg$1$}
 
+   UserMenu:
+    - - {text: SDMyOpenList, callback_data: myOpenListSD$1$}
+    - - {text: SDMyWaitList, callback_data: myWaitListSD$1$}
+
+synonim:
+   sd:
+      role-base: 
+                user: {command: detail, item-reg: ".*([Ss][Dd]\\d+)$"}
+                operator: {command: detail, item-reg: ".*([Ss][Dd]\\d+)$"}
+      command: "status"
+      item-reg: ".*([Ss][Dd]\\d+)$"

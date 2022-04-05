@@ -4,6 +4,7 @@
             [taoensso.timbre :as timbre]
             [smtbot.bot.users.globals :refer [user-validation-mode]]
             [smtbot.bot.users.user-cache :as user-cache]
+            [clojure.string :as str]
             [smtbot.bot.users.validate :as v]))
 
 
@@ -109,12 +110,14 @@
   (case  (-> user-id get-user get-user-status)
     (:user-ok  :user-invalid :user-blocked) :already-registred
     :reg-in-progress :check-progress
-    :user-not-found (do
-                      (@(delay (@botuser-action :insert-or-update)) (str user-id) smkey)
-                      (if (= user-validation-mode "sync")
-                        (v/registrate-user smkey)
-                        (v/request-reqistration smkey))
-                      :continue-registration)))
+    :user-not-found (if (nil? ((@botuser-action :get-by-key) smkey))
+                      (do
+                        (@(delay (@botuser-action :insert-or-update)) (str user-id) smkey)
+                        (if (= user-validation-mode "sync")
+                          (v/registrate-user smkey)
+                          (v/request-reqistration smkey))
+                        :continue-registration)
+                      :already-registred)))
 
 (defn confirm-registration
   "
@@ -139,6 +142,23 @@
   (let [user-id (str user-id)]
     (user-cache/remove-by-id user-id)
     ((@botuser-action :delete-by-id) user-id)))
+
+
+(defn admin-user-setup [id smkey role status] {:pre [(or (= role "operator") (= role "user"))
+                                                     (some? id) (some? smkey)
+                                                     (-> status (subs 0 1) (case  ("A" "B" "N" "M" "C") true false))]}
+  (try
+    ((@botuser-action :insert-or-update) (str id) (str/lower-case smkey))
+    (if (= (first ((@botuser-action :update-by-key) smkey status role)) 1)
+      (println "New user parmaters:" ((@botuser-action :get-by-id) (str id)))
+      (println "Unable to change user parameters"))
+    (catch Exception e  (println "User set up error:" (ex-message e)))))
+
+(defn extend-session [id extend-hours] {:pre [(or (int? extend-hours) (float? extend-hours))]}
+  (if-let [user   ((@botuser-action :get-by-id) (str id))]
+    ((@botuser-action :set-sesion-length) 
+     (user :smkey) "А" (user :role) (* extend-hours 3600))
+    (println "User " id " not found")))
 
 
 

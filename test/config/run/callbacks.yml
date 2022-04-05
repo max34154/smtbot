@@ -8,6 +8,13 @@
       operator: "always" 
     }
 
+
+- callback: getSDStatus
+  service: FOSeaistIntInfo
+  action: get
+  collection-item-key: InteractionID
+
+
 - callback: getMySD
   service: FOSeaistIntInfo
   action: get-query

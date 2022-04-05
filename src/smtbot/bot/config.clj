@@ -34,6 +34,18 @@
                             #(apply hash-set (map keyword %))))
                command))     command (keys command)))
 
+(defn synonim-role-process [synonim]
+  (reduce  (fn [synonim synonim-key]
+             (if (some? (-> synonim synonim-key :role-base))
+               (update-in synonim [synonim-key :role-base]
+                          (fn [v]
+                            (into {}
+                                  (map #(assoc {} (key %) (update  (val %) :item-reg re-pattern))
+                                       v))))
+               synonim))
+           synonim
+           (keys synonim)))
+
 (defn- read-config [path]
   (let [path (or path default-conf-path)]
     (conj (-> (yaml/from-file (str path "commands.yml"))
@@ -56,7 +68,9 @@
               (update :menu-callback k/mk-pattern-map [:callback-reg])
               (update :menu-callback role-process)
              ; (update :menu-callbac role-process)
-              (update :menu k/keywordize-map-vec2 [:text :callback-data])))))
+              (update :menu k/keywordize-map-vec2 [:text :callback-data])
+              (update :synonim k/mk-pattern-map [:item-reg])
+              (update :synonim synonim-role-process)))))
 
 (defn- read-mappers [_ path]
   (let [path (or path default-conf-path)]
@@ -104,4 +118,5 @@
           :callback-map (read-callbacks nil path))
    #_(configure "test/config/run/")))
 
-(comment (simulate-configure "test/config/run/"))
+(comment (simulate-configure "test/config/run/")
+         (-> (simulate-configure "test/config/run/") :bot :synonim))

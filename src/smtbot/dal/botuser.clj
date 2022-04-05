@@ -80,12 +80,12 @@
         update-sql (str "UPDATE " db-schema ".BOTUSER SET status = 'W', expire_at = NULL WHERE  id=? AND smkey=?")]
     (fn [id smkey]
       (let [smkey (str/lower-case smkey)]
-      (jdbc/with-db-transaction [t-con @db]
-        (when  (zero? (first (jdbc/execute! t-con
-                                            [update-sql id smkey])))
-          (jdbc/execute! t-con [insert-sql
-                                 id
-                                 smkey])))))))
+        (jdbc/with-db-transaction [t-con @db]
+          (when  (zero? (first  (jdbc/execute! t-con
+                                               [update-sql id smkey])))
+            (jdbc/execute! t-con [insert-sql
+                                  id
+                                  smkey])))))))
 
 (defn update-botuser-by-key-factory [db-config]
   (let [update-sql (update-botuser-by-key-sql db-config)]
@@ -97,14 +97,24 @@
                           (str/lower-case smkey)]))))
 
 
+(defn set-session-length-by-key-factory [db-config]
+  (let [update-sql (update-botuser-by-key-sql db-config)]
+    (fn [smkey status role session-length]
+      (jdbc/execute! @db [update-sql
+                          status
+                          (expire-at-timestamp-seconds session-length)
+                          role
+                          (str/lower-case smkey)]))))
+
+
 
 
 (defn setup-botuser-update-time-factory [db-config]
   (let [update-sql (setup-botuser-update-time-sql db-config)]
     (fn [key-list]
       (timbre/debug "update-sql->" (format update-sql
-                       (str/join "','" key-list)))
-      (jdbc/execute! @db [(format update-sql (str/join "','" key-list))  
+                                           (str/join "','" key-list)))
+      (jdbc/execute! @db [(format update-sql (str/join "','" key-list))
                           (unixtime->timestamp (tod))]))))
 
 
@@ -148,6 +158,7 @@
   {:insert-or-update (insert-or-update-botuser-factory db-schema) ;;test +
    :update-by-key (update-botuser-by-key-factory db-config) ;;test +
    :set-update-time (setup-botuser-update-time-factory db-config) ;;test +
+   :set-sesion-length (set-session-length-by-key-factory db-config)
    :get-require-update (get-require-update db-config)
    :get-all (get-all-botuser-factory db-schema) ;;test +
    :get-by-id (get-botuser-by-id-factory db-schema) ;;test +
